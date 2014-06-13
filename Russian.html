@@ -1,0 +1,587 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>demo</title>
+<style type="text/css">
+	body,p,table,tr,td,h6{padding: 0; margin: 0;}
+	#bg{margin: 30px auto 0; height: 480px; width: 400px;border: 1px solid black;}
+	canvas{float: left;}
+	h6{padding: 10px; font-size: 16px; text-align: center;}
+	p{float: left; font-size: 20px;font-weight: bold; width: 90px;  padding: 5px; text-align: right; height: 20px;}
+	#p{float: left; margin-bottom: 40px; height: 40px}
+	#p span{font-weight: bold; font-size: 16px; color: red;}
+	#next{width: 100px; height: 100px; float: left; margin-bottom: 30px;}
+	#next tr{height: 25px;}
+	#next td img{width: 22px; height: 22px;}
+	#btn{ width: 100px; text-align: center; height: 40px;margin-bottom: 30px; float: left; text-decoration: none; font-size: 20px; font-weight: bold; line-height: 40px; color: #000;}
+	#btn:hover{color: #757575; background: #00EEEE;}
+	#explan{width: 100px; float: left;}
+	#explan span{float: left; padding: 5px;}
+</style>
+<script type="text/javascript">
+	window.onload=function(){
+		var canvas = document.getElementById('canvas');
+		var oSpan=document.getElementById('p').getElementsByTagName('span')[0];
+		var oBtn = document.getElementById('btn');
+		var oNext = document.getElementById('next');
+		var aImg = oNext.getElementsByTagName('img');
+		oBtn.onclick = function(){
+			window.location= "Russian.html"
+		}
+		function getBlock(n){
+			for(var i = 0; i < aImg.length; i ++){
+				aImg[i].src = '';
+			}
+			switch(n){
+				case 1 :
+					oNext.rows[1].cells[1].children[0].src = oNext.rows[1].cells[2].children[0].src = oNext.rows[2].cells[1].children[0].src = oNext.rows[2].cells[2].children[0].src = 'imgs/1.jpg';
+				break;
+				case 2 :
+					oNext.rows[1].cells[1].children[0].src = oNext.rows[2].cells[1].children[0].src = oNext.rows[3].cells[1].children[0].src = oNext.rows[3].cells[2].children[0].src = 'imgs/2.jpg';
+				break;
+				case 3 :
+					oNext.rows[1].cells[2].children[0].src = oNext.rows[2].cells[2].children[0].src = oNext.rows[3].cells[2].children[0].src = oNext.rows[3].cells[1].children[0].src = 'imgs/3.jpg';
+				break;
+				case 4 :
+					oNext.rows[1].cells[0].children[0].src = oNext.rows[1].cells[1].children[0].src = oNext.rows[2].cells[1].children[0].src = oNext.rows[2].cells[2].children[0].src = 'imgs/4.jpg';
+				break;
+				case 5 :
+					oNext.rows[2].cells[1].children[0].src = oNext.rows[2].cells[2].children[0].src = oNext.rows[1].cells[2].children[0].src = oNext.rows[1].cells[3].children[0].src = 'imgs/5.jpg';
+				break;
+				case 6 :
+					oNext.rows[1].cells[0].children[0].src = oNext.rows[1].cells[1].children[0].src = oNext.rows[1].cells[2].children[0].src = oNext.rows[1].cells[3].children[0].src = 'imgs/6.jpg';
+				break;
+				case 7 :
+					oNext.rows[1].cells[0].children[0].src = oNext.rows[1].cells[1].children[0].src = oNext.rows[1].cells[2].children[0].src = oNext.rows[0].cells[1].children[0].src = 'imgs/7.jpg';
+				break;
+			}
+		}
+
+
+		//游戏部分
+		var context=canvas.getContext('2d');
+		var iX = 10, iY = 16, iCS = 30;
+		var oBtn = true, oTxt = 1, gameOver = false, score = 0, num = 1, arr2 = [], arrBack = [], oldNum;
+		var button, box, timer;
+		canvas.width = iX*iCS;
+		canvas.height = iY*iCS;
+		function Button( x, y, w, h, img){
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
+			this.img = img;
+		}
+
+		function Box(n){
+			this.img = new Image();
+			this.status  = 0;
+			switch(n){
+				case 1:
+					this.arr = [{'x' : 4, 'y' : 0},{'x' : 5, 'y' : 0},{'x' : 4, 'y' : 1},{'x' : 5, 'y' : 1}]
+				break;
+				case 2:
+					this.arr = [{'x' : 4, 'y' : 0},{'x' : 4, 'y' : 1},{'x' : 4, 'y' : 2},{'x' : 5, 'y' : 2}]
+				break;
+				case 3:
+					this.arr = [{'x' : 4, 'y' : 2},{'x' : 5, 'y' : 2},{'x' : 5, 'y' : 1},{'x' : 5, 'y' : 0}]
+				break;
+				case 4:
+					this.arr = [{'x' : 4, 'y' : 0},{'x' : 5, 'y' : 0},{'x' : 5, 'y' : 1},{'x' : 6, 'y' : 1}]
+				break;
+				case 5:
+					this.arr = [{'x' : 4, 'y' : 1},{'x' : 5, 'y' : 1},{'x' : 5, 'y' : 0},{'x' : 6, 'y' : 0}]
+				break;
+				case 6:
+					this.arr = [{'x' : 4, 'y' : 0},{'x' : 4, 'y' : 1},{'x' : 4, 'y' : 2},{'x' : 4, 'y' : 3}]
+				break;
+				case 7:
+					this.arr = [{'x' : 5, 'y' : 0},{'x' : 4, 'y' : 1},{'x' : 5, 'y' : 1},{'x' : 6, 'y' : 1}]
+				break;
+			}
+			this.img.src = 'imgs/'+n+'.jpg';
+		}
+		/*******js 深拷贝*******/
+	    function extend(d,s){
+	        for(var i = 0; i < s.length; i++){
+	        	d[i] = {};
+                for(var p in s[i]){
+                	d[i][p] = s[i][p];
+                }
+                
+	        }
+	    }
+	    /*******js 深拷贝*******/
+		function create(){
+			oldNum = num;
+			box = new Box(num);
+			box.move();
+			
+		}
+
+		Box.prototype.move = function(){
+			var This = this;
+			if(map[1][4] !== 0){gameOver = true; return};
+			num = Math.ceil(Math.random()*7);
+			getBlock(num);
+			clearInterval(timer);
+			timer = setInterval(function(){
+				if(This.canDown()){
+					This.moveDown();
+				}else{
+					clearInterval(timer);
+					This.toMap();
+					create();
+				}
+				
+			},500)
+		}
+
+		Box.prototype.toMap = function(){
+			for(var i = 0; i < box.arr.length; i++){
+				map[box.arr[i].y][box.arr[i].x] = oldNum;
+			}
+		}
+
+		Box.prototype.canDown = function(){
+			extend(arr2, this.arr);
+			arr2.sort(function(a,b){return b.y - a.y});
+			if(arr2[0].y >= iY-1)return false;
+			for(var i = 0; i < this.arr.length; i++){
+				if(map[this.arr[i].y+1][this.arr[i].x] !== 0){
+					return false;
+				}
+			}
+			return true;
+		}
+		Box.prototype.canLeft = function(){
+			extend(arr2, this.arr);
+			arr2.sort(function(a,b){return a.x - b.x});
+			if(arr2[0].x <= 0)return false;
+			for(var i = 0; i < this.arr.length; i++){
+				if(map[this.arr[i].y][this.arr[i].x-1] !== 0){
+					return false;
+				}
+			}
+			return true;
+		}
+
+		Box.prototype.canRight = function(){
+			extend(arr2, this.arr);
+			arr2.sort(function(a,b){return b.x - a.x});
+			if(arr2[0].x >= iX-1)return false;
+			for(var i = 0; i < this.arr.length; i++){
+				if(map[this.arr[i].y][this.arr[i].x+1] !== 0){
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		Box.prototype.moveDown = function(){
+			for(var i = 0; i < this.arr.length; i++){
+				this.arr[i].y++;
+			}
+		}
+
+		Box.prototype.moveLeft = function(){
+			for(var i = 0; i < this.arr.length; i++){
+				this.arr[i].x--;
+			}
+		}
+
+		Box.prototype.moveRight = function(){
+			for(var i = 0; i < this.arr.length; i++){
+				this.arr[i].x++;
+			}
+		}
+
+		Box.prototype.canRotate = function(){
+			extend(arr2, this.arr);
+			arr2.sort(function(a,b){return a.x - b.x});
+			if(arr2[0].x < 0)return false;
+			arr2.sort(function(a,b){return b.x - a.x});
+			if(arr2[0].x > iX-1)return false;
+			arr2.sort(function(a,b){return b.y - a.y});
+			if(arr2[0].y > iY-1)return false;
+			for(var i = 0; i < this.arr.length; i++){
+				if(map[this.arr[i].y][this.arr[i].x] !== 0){
+					return false;
+				}
+			}
+			return true;
+		}
+		Box.prototype.rotate = function(){
+			switch(oldNum){
+				case 2:
+					this.status++;
+					this.status %= 4;
+					if( this.status === 0 ){
+						this.arr[0].x -= 1;
+						this.arr[0].y -= 1;
+						this.arr[2].x += 1;
+						this.arr[2].y += 1;
+						this.arr[3].x += 2;
+					}else if( this.status === 1 ){
+						this.arr[0].y += 1;
+						this.arr[0].x -= 1;
+						this.arr[2].x += 1;
+						this.arr[2].y -= 1;
+						this.arr[3].y -= 2;
+					}else if( this.status === 2 ){
+						this.arr[0].x += 1;
+						this.arr[0].y += 1;
+						this.arr[2].x -= 1;
+						this.arr[2].y -= 1;
+						this.arr[3].x -= 2;
+					}else if( this.status === 3 ){
+						this.arr[0].y -= 1;
+						this.arr[0].x += 1;
+						this.arr[2].y += 1;
+						this.arr[2].x -= 1;
+						this.arr[3].y += 2;
+					}
+				break;
+				case 3:
+					this.status++;
+					this.status %= 4;
+					if( this.status === 0 ){
+						this.arr[0].y += 2;
+						this.arr[1].y += 2;
+						this.arr[2].x -= 1;
+						this.arr[2].y += 1;
+						this.arr[3].x -= 1;
+						this.arr[3].y -= 1;
+					}else if( this.status === 1 ){
+						this.arr[0].y -= 2;
+						this.arr[1].x -= 1;
+						this.arr[1].y -= 1;
+						this.arr[3].x += 1;
+						this.arr[3].y += 1;
+					}else if( this.status === 2 ){
+						this.arr[0].x += 1;
+						this.arr[1].y -= 1;
+						this.arr[2].x -= 1;
+						this.arr[3].x -= 2;
+						this.arr[3].y += 1;
+					}else if( this.status === 3 ){
+						this.arr[0].x -= 1;
+						this.arr[1].x += 1;
+						this.arr[2].x += 2;
+						this.arr[2].y -= 1;
+						this.arr[3].x += 2;
+						this.arr[3].y -= 1;
+					}
+				break;
+				case 4:
+					this.status++;
+					this.status %= 2;
+					if( this.status === 1 ){
+						this.arr[0].x += 1;
+						this.arr[1].y += 1;
+						this.arr[2].x -= 1;
+						this.arr[3].x -= 2;
+						this.arr[3].y += 1;
+					}else{
+						this.arr[0].x -= 1;
+						this.arr[1].y -= 1;
+						this.arr[2].x += 1;
+						this.arr[3].x += 2;
+						this.arr[3].y -= 1;
+					}
+				break;
+				case 5:
+					this.status++;
+					this.status %= 2;
+					if( this.status === 1 ){
+						this.arr[0].y -= 1;
+						this.arr[1].x -= 1;
+						this.arr[2].y += 1;
+						this.arr[3].x -= 1;
+						this.arr[3].y += 2;
+					}else{
+						this.arr[0].y += 1;
+						this.arr[1].x += 1;
+						this.arr[2].y -= 1;
+						this.arr[3].x += 1;
+						this.arr[3].y -= 2;
+					}
+				break;
+				case 6:
+					this.status++;
+					this.status %= 2;
+					if( this.status === 1 ){
+						this.arr[1].x += 1;
+						this.arr[1].y -= 1;
+						this.arr[2].x += 2;
+						this.arr[2].y -= 2;
+						this.arr[3].x += 3;
+						this.arr[3].y -= 3;
+					}else{
+						this.arr[1].x -= 1;
+						this.arr[1].y += 1;
+						this.arr[2].x -= 2;
+						this.arr[2].y += 2;
+						this.arr[3].x -= 3;
+						this.arr[3].y += 3;
+					}
+				break;
+				case 7:
+					this.status++;
+					this.status %= 4;
+					if( this.status === 0 ){
+						this.arr[0].y -= 1;
+						this.arr[1].y += 1;
+						this.arr[2].x += 1;
+						this.arr[3].x += 2;
+						this.arr[3].y -= 1;
+					}else if( this.status === 1 ){
+						this.arr[0].x -= 1;
+						this.arr[0].y += 1;
+						this.arr[1].x += 1;
+						this.arr[1].y -= 1;
+						this.arr[3].x -= 1;
+						this.arr[3].y += 1;
+					}else if( this.status === 2 ){
+						this.arr[0].x += 1;
+						this.arr[1].x -= 1;
+						this.arr[2].y -= 1;
+						this.arr[3].x += 1;
+						this.arr[3].y -= 2;
+					}else if( this.status === 3 ){
+						this.arr[2].x -= 1;
+						this.arr[2].y += 1;
+						this.arr[3].x -= 2;
+						this.arr[3].y += 2;
+					}
+				break;
+			}
+			
+		}
+
+		function clearMap(){
+			for(var y = iY-1; y >= 0; y--){
+				var num = 0;
+				for(var x = iX-1; x >= 0; x--){
+					if(map[y][x] === 0){
+						num++;
+					}
+				}
+				if(num === 0){
+					map.splice( y, 1);
+					map.unshift([0,0,0,0,0,0,0,0,0,0]);
+					score +=1;
+				}
+			}
+		}
+		function clear(){
+			context.clearRect( 0, 0, canvas.width, canvas.height)
+		}
+		var map = [ [0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0,0,0]
+					];			
+
+		var buttonImg = new Image();
+		buttonImg.src = 'imgs/button.png';
+		
+		var oImg1 = new Image();
+		oImg1.src='imgs/1.jpg';
+		var oImg2 = new Image();
+		oImg2.src='imgs/2.jpg';
+		var oImg3 = new Image();
+		oImg3.src='imgs/3.jpg';
+		var oImg4 = new Image();
+		oImg4.src='imgs/4.jpg';
+		var oImg5 = new Image();
+		oImg5.src='imgs/5.jpg';
+		var oImg6 = new Image();
+		oImg6.src='imgs/6.jpg';
+		var oImg7 = new Image();
+		oImg7.src='imgs/7.jpg';
+		
+		button = new Button( 90, 210, 120, 60, buttonImg);
+		function drawScence(){
+			clear();
+			//画背景
+			context.fillStyle = '#000';
+   			context.fillRect(0, 0, canvas.width, canvas.height);
+   			
+   			//开始页面
+   			if(oBtn){
+   				context.save();
+   				context.drawImage( button.img, 0, 0, button.w, button.h, button.x, button.y, button.w, button.h);
+   				context.restore();
+   			}
+   			if(oTxt){				
+   				context.save();
+   				context.textAlign = 'center';
+       			context.textBaseline = 'top';
+       			context.shadowOffsetX = 2;
+				context.shadowOffsetY = 2;
+				context.shadowBlur = 2;
+				context.shadowColor = "rgba(0, 0, 0, 0.5)";			
+       			context.font = "22px Times New Roman";
+       			context.fillStyle = '#FFFFFF';
+   				context.fillText( "开始游戏", 150, 225);
+   				context.restore();
+   			}  			
+   			//画游戏页面
+   			if(!oBtn && !gameOver){
+   				for(var y = 0; y < iY ;y++){
+   					for(var x = 0; x < iX ;x++){
+   						switch(map[y][x]){
+   							case 0 :
+   							break;
+   							case 1 :
+   								context.drawImage( oImg1, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   							case 2 :
+   								context.drawImage( oImg2, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   							case 3 :
+   								context.drawImage( oImg3, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   							case 4 :
+   								context.drawImage( oImg4, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   							case 5 :
+   								context.drawImage( oImg5, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   							case 6 :
+   								context.drawImage( oImg6, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   							case 7 :
+   								context.drawImage( oImg7, 0, 0, 30, 30, x*iCS, y*iCS, 30, 30);
+   							break;
+   						};
+						
+   					}
+   				}
+   				//画方块
+   				if(box){
+   					context.save();
+   					for(var i =0; i < box.arr.length; i++){
+   						context.drawImage(box.img, 0, 0, iCS, iCS, box.arr[i].x*iCS, box.arr[i].y*iCS,iCS, iCS);
+   					}
+   					context.restore();
+   				}	
+   			}
+   			if(gameOver){
+   				context.save();
+   				context.textAlign = 'center';
+       			context.textBaseline = 'top';
+       			context.shadowOffsetX = 2;
+				context.shadowOffsetY = 2;
+				context.shadowBlur = 2;
+				context.shadowColor = "rgba(0, 0, 0, 0.5)";    			
+       			context.font = "22px Times New Roman";
+       			context.fillStyle = '#FFFFFF';
+   				context.fillText( "哦，gameover！", 150, 225);
+   				context.restore();
+   			}		
+		}
+		//切换游戏界面
+		document.onmousedown = function(e){
+			if(oBtn){
+				var e = e || window.event;
+				var x = e.clientX - canvas.offsetLeft;
+				var y = e.clientY - canvas.offsetTop;
+				if( x > button.x && y > button.y && x < button.x+button.w && y < button.y+button.h){
+					oBtn = false;
+					oTxt = 0;
+					create();
+				}
+			}
+		}
+		document.onkeydown = function(e){
+			var e = e || window.event;
+			switch(e.keyCode){
+				case 65://a  left
+					if(box.canLeft()) box.moveLeft();
+				break;
+				case 68://d  right
+					if(box.canRight()) box.moveRight();
+				break;
+				case 83://d  down
+					if(box.canDown()){
+						box.moveDown();
+					}
+				break;
+				case 87://w  up					
+					extend(arrBack, box.arr);
+					box.rotate();
+					if(!box.canRotate()){
+						extend(box.arr, arrBack);
+						if(box.status === 0 ){
+							if( num === 2 || num === 3 || num === 7 ){
+								box.status = 4;
+							}else if(num === 6 || num === 5 || num === 4){
+								box.status = 2;
+							}
+						}
+						box.status--;
+					}
+				break;
+			}
+		}
+		setInterval(function(){ drawScence();clearMap();oSpan.innerHTML = score;},30);
+	}
+</script>
+</head>
+<body>
+	<div id="bg">
+		<canvas id="canvas"></canvas>
+		<h6>Russian</h6>
+		<p id="p">Score<br><span></span></p>
+		<p>Next</p>		
+		<table id="next">
+			<tr>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+			</tr>
+			<tr>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+			</tr>
+			<tr>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+			</tr>
+			<tr>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+				<td><img src=""></td>
+			</tr>
+		</table>
+		<a id="btn" href="javascript:;">重来</a>
+		<div id="explan">
+			<span>W键: 翻转</span>
+			<span>A键: 左移动</span>
+			<span>S键: 下移动</span>
+			<span>D键: 右移动</span>
+		</div>
+	</div>
+</body>
+</html>
